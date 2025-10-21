@@ -11,8 +11,8 @@ Phase 1 MVP implementation in progress. Basic project structure established with
 - All tests passing, CLI help working correctly
 
 ## Next Steps
-- Implement `anvil new` command with profile support (lib, cli, api, service, monorepo)
-- Add configuration system with anvil.toml parsing
-- Implement basic profile templates and scaffolding logic
 - Add tool detection and fallback behavior for ruff, pytest, etc.
 - Begin development of core toolchain commands (fmt, lint, test)
+- Implement `anvil dev` command with file watching
+- Add `anvil run` command with entry point resolution
+- Implement remaining toolchain commands (build, release)
