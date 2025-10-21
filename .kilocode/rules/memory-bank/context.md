@@ -1,14 +1,18 @@
 # Current Context
 
 ## Work Focus
-Initializing the Memory Bank for the Anvil project. This is the first task in the project lifecycle, establishing the foundation for all future development work.
+Phase 1 MVP implementation in progress. Basic project structure established with uv, CLI framework implemented, and core commands defined as placeholders.
 
 ## Recent Changes
-- Memory Bank initialization started
-- Core files (brief.md, product.md) created and populated
-- Project structure analyzed (minimal codebase exists currently)
+- Memory Bank fully initialized with all 5 core files (brief.md, product.md, context.md, architecture.md, tech.md)
+- Project structure initialized with uv: src/anvil/ package, pyproject.toml configured, dependencies installed
+- Basic CLI framework implemented with all core commands (new, dev, run, fmt, lint, test, build) as placeholders
+- Comprehensive test suite created with 9 tests covering CLI functionality
+- All tests passing, CLI help working correctly
 
 ## Next Steps
-- Complete Memory Bank initialization with architecture.md and tech.md
-- Begin implementation of Phase 1 MVP (Weeks 2-4) focusing on core commands and profiles
-- Set up basic project structure and CLI framework
+- Implement `anvil new` command with profile support (lib, cli, api, service, monorepo)
+- Add configuration system with anvil.toml parsing
+- Implement basic profile templates and scaffolding logic
+- Add tool detection and fallback behavior for ruff, pytest, etc.
+- Begin development of core toolchain commands (fmt, lint, test)
