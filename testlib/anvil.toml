@@ -1,5 +1,0 @@
-
-[project]
-name = "testlib"
-package = "testlib"
-profile = "lib"
