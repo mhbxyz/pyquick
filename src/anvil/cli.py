@@ -335,15 +335,32 @@ def check() -> None:
 @main.command()
 @click.option("--plan", is_flag=True, help="Show plan without applying changes")
 @click.option("--force", is_flag=True, help="Apply changes without confirmation")
-def apply(plan: bool, force: bool) -> None:
+@click.option("--validate", is_flag=True, help="Validate configuration before applying")
+def apply(plan: bool, force: bool, validate: bool) -> None:
     """Apply anvil.toml configuration to project files."""
     from .config import Config
     from .patch import PatchEngine
+    from .validator import validate_config_with_report
 
     console.print("[bold purple]🔧[/bold purple] Applying configuration...")
 
     config = Config()
     config.load()  # Load the configuration
+
+    # Validate configuration if requested
+    if validate:
+        console.print("[dim]Validating configuration...[/dim]")
+        validation_report = validate_config_with_report(config)
+        console.print(validation_report)
+
+        # Check if there are any errors
+        if "error(s) found" in validation_report:
+            console.print(
+                "[red]❌ Configuration validation failed. Use --force to apply anyway.[/red]"
+            )
+            if not force:
+                return
+
     engine = PatchEngine()
 
     if plan:
