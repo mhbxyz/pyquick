@@ -50,9 +50,8 @@ def new(name: str, profile: str, template: str) -> None:
         console.print(f"[red]Error:[/red] Directory '{name}' already exists")
         return
 
-    # Create project directory
+    # Create project directory (do not change global CWD)
     project_dir.mkdir()
-    os.chdir(project_dir)
 
     # Get profile and scaffold
     profile_obj = get_profile(profile)
@@ -60,8 +59,9 @@ def new(name: str, profile: str, template: str) -> None:
         console.print(f"[red]Error:[/red] Failed to load profile '{profile}'")
         return
 
-    # Create initial config
-    config = Config()
+    # Create initial config anchored to the new project directory and load defaults
+    config = Config(project_dir)
+    config.load()
     config.set("project.name", name)
     config.set("project.package", name.replace("-", "_"))
     config.set("project.profile", profile)
@@ -94,6 +94,9 @@ def dev() -> None:
     executor = ToolExecutor(config)
     dev_runner = DevRunner(config, executor)
 
+    # Signal to dev runner that we're executing via CLI to avoid nested pytest
+    prev_flag = os.environ.get("ANVIL_FROM_CLI_DEV")
+    os.environ["ANVIL_FROM_CLI_DEV"] = "1"
     try:
         dev_runner.run()
     except KeyboardInterrupt:
@@ -101,6 +104,12 @@ def dev() -> None:
     except Exception as e:
         console.print(f"[red]Error:[/red] Failed to start development mode: {e}")
         return
+    finally:
+        # Restore previous env
+        if prev_flag is None:
+            os.environ.pop("ANVIL_FROM_CLI_DEV", None)
+        else:
+            os.environ["ANVIL_FROM_CLI_DEV"] = prev_flag
 
 
 @main.command()

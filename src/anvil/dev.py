@@ -74,8 +74,11 @@ class DevEventHandler(FileSystemEventHandler):
         else:
             console.print("  [red]✗[/red] Formatting check failed")
 
-        # Run tests, but avoid recursive invocation when already under pytest
-        if os.environ.get("PYTEST_CURRENT_TEST"):
+        # Run tests, but avoid recursive invocation when the CLI dev command
+        # is invoked under pytest (prevents nested pytest processes).
+        if os.environ.get("ANVIL_FROM_CLI_DEV") and os.environ.get(
+            "PYTEST_CURRENT_TEST"
+        ):
             console.print("  [dim]Skipping pytest (running inside pytest)[/dim]")
             test_exit_code = 0
         else:
@@ -137,21 +140,21 @@ class DevRunner:
             console.print("[dim]Running initial checks...[/dim]")
             event_handler._run_checks()
 
+            # For API profiles, also attempt to start the server with auto-reload
+            if profile == "api":
+                self._run_api_server()
+
             # Short-circuit in one-shot mode to avoid infinite loops/threads
             if oneshot:
                 return
 
-            # For API profiles, also start the server with auto-reload
-            if profile == "api":
-                self._run_api_server()
-            else:
-                # For other profiles, just watch and run checks
-                console.print("[dim]Press Ctrl+C to stop...[/dim]")
-                try:
-                    while True:
-                        time.sleep(1)
-                except KeyboardInterrupt:
-                    pass
+            # For other profiles, just watch and run checks
+            console.print("[dim]Press Ctrl+C to stop...[/dim]")
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                pass
         finally:
             # Always stop and join observer to prevent thread leaks
             try:

@@ -105,7 +105,8 @@ class ApiProfile(Profile):
     def scaffold(self, project_name: str, config: Config) -> None:
         """Scaffold API project structure."""
         package_name = config.get("project.package", project_name.replace("-", "_"))
-        template = config.get("api.template", "fastapi")
+        # Only scaffold specific frameworks when template is explicitly set.
+        template = config.get("api.template")
 
         # Create src/package structure
         src_dir = config.project_root / "src"
