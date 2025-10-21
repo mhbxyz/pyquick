@@ -296,65 +296,64 @@ def check() -> None:
 def apply(plan: bool, force: bool) -> None:
     """Apply anvil.toml configuration to project files."""
     from .config import Config
+    from .patch import PatchEngine
 
     console.print("[bold purple]🔧[/bold purple] Applying configuration...")
 
     config = Config()
-
-    # For now, just show that the command is recognized
-    # Phase 2 implementation will add the actual patch engine
-    console.print("[dim]Configuration application not yet implemented[/dim]")
-    console.print("[dim]This will be added in Phase 2: Patch Engine[/dim]")
+    engine = PatchEngine()
 
     if plan:
+        # Show what would be changed
+        operations = engine.plan_changes(config, config.project_root)
+
+        if not operations:
+            console.print("[dim]No changes needed - configuration is up to date[/dim]")
+            return
+
+        console.print(f"[bold]Planned changes ({len(operations)} operations):[/bold]")
+        console.print()
+
+        for i, op in enumerate(operations, 1):
+            status_icon = {
+                op.patch_type.value: "📄" if "file" in op.patch_type.value else "📦"
+            }.get(op.patch_type.value, "🔧")
+
+            console.print(f"{i}. {status_icon} {op.description}")
+            console.print(f"   [dim]{op.patch_type.value}: {op.target_path}[/dim]")
+
+        console.print()
         console.print("[green]✓[/green] Plan mode: no changes applied")
+        console.print("[dim]Use --force to apply these changes[/dim]")
     else:
-        console.print("[yellow]⚠️[/yellow]  Apply functionality coming soon")
+        # Apply the changes
+        results = engine.apply_changes(
+            config, config.project_root, force=force, dry_run=False
+        )
 
+        if not results:
+            console.print("[dim]No changes applied - configuration is up to date[/dim]")
+            return
 
-if __name__ == "__main__":
-    main()
-    # Run linting
-    console.print("  [dim]Running linter...[/dim]")
-    lint_exit_code = executor.run_ruff_check(lint_paths)
-    if lint_exit_code == 0:
-        console.print("  [green]✓[/green] Linting passed")
-    else:
-        console.print("  [red]✗[/red] Linting failed")
-        all_passed = False
+        successful = [r for r in results if r.success]
+        failed = [r for r in results if not r.success]
 
-    # Run format check
-    console.print("  [dim]Checking formatting...[/dim]")
-    format_exit_code = executor.run_ruff_format(format_paths, check_only=True)
-    if format_exit_code == 0:
-        console.print("  [green]✓[/green] Formatting check passed")
-    else:
-        console.print("  [red]✗[/red] Formatting check failed")
-        all_passed = False
+        console.print(f"[bold]Applied {len(successful)} changes:[/bold]")
 
-    # Run type checking only if explicitly enabled (boolean or dict flag).
-    # This avoids accidentally running heavy type checkers during tests
-    # when users set a string like "pyright" as the tool preference.
-    types_setting = config.get("features.types", False)
-    types_enabled = (isinstance(types_setting, bool) and types_setting is True) or (
-        isinstance(types_setting, dict) and bool(types_setting.get("enabled", False))
-    )
+        for result in successful:
+            console.print(f"[green]✓[/green] {result.message}")
 
-    if types_enabled:
-        console.print("  [dim]Running type checker...[/dim]")
-        type_exit_code = executor.run_type_check()
-        if type_exit_code == 0:
-            console.print("  [green]✓[/green] Type checking passed")
+        if failed:
+            console.print(f"[bold red]Failed {len(failed)} operations:[/bold red]")
+            for result in failed:
+                console.print(f"[red]✗[/red] {result.message}")
+
+        if successful and not failed:
+            console.print("[green]✓[/green] All changes applied successfully!")
+        elif successful:
+            console.print("[yellow]⚠️[/yellow] Some changes applied, some failed")
         else:
-            console.print("  [red]✗[/red] Type checking failed")
-            all_passed = False
-    else:
-        console.print("  [dim]Type checking skipped (not enabled)[/dim]")
-
-    if all_passed:
-        console.print("[green]✓[/green] All checks passed!")
-    else:
-        console.print("[red]✗[/red] Some checks failed")
+            console.print("[red]✗[/red] All changes failed")
 
 
 @main.command()
@@ -465,10 +464,6 @@ def release(dry_run: bool, patch: bool, force: bool) -> None:
 
     console.print("[green]✓[/green] Release completed successfully!")
     console.print("[dim]Don't forget to push tags: git push --tags[/dim]")
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":

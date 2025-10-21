@@ -21,10 +21,11 @@ Phase 1 MVP implementation in progress. Basic project structure established with
 
 ## Next Steps
 - Phase 1 MVP completed successfully
-- All core commands implemented: new, dev, run, fmt, lint, check, test, build, release
+- All core commands implemented: new, dev, run, fmt, lint, check, test, build, release, apply
 - Tool detection and fallback behavior working
 - File watching and auto-reload in dev mode
 - Entry point resolution for different project profiles
 - Binary build support with PyInstaller
 - Pre-commit hooks configured with ruff, pyright, bandit
-- Ready for Phase 2: Patch Engine development
+- Placeholder apply command added for Phase 2 preparation
+- Ready for Phase 2: Patch Engine development (TOML/YAML merge with comments, anvil apply --plan)

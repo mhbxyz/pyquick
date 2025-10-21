@@ -18,7 +18,7 @@ def test_cli_help():
     runner = CliRunner()
     result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
-    assert "Anvil: Python toolchain orchestrator" in result.output
+    assert "🔨 Anvil: Python Toolchain Orchestrator" in result.output
 
 
 def test_cli_version():
