@@ -1,6 +1,8 @@
 """Main CLI entry point for Anvil."""
 
+import os
 import sys
+from pathlib import Path
 from typing import Optional
 
 import click
@@ -20,10 +22,56 @@ def main() -> None:
 
 
 @main.command()
-def new() -> None:
+@click.argument("name")
+@click.option("--profile", default="lib", help="Project profile (lib, cli, api, service, monorepo)")
+@click.option("--template", help="Template for API profile (fastapi, flask)")
+def new(name: str, profile: str, template: str) -> None:
     """Scaffold a new Python project."""
-    console.print("[bold green]🚀[/bold green] Creating new project...")
-    console.print("[yellow]Not implemented yet[/yellow]")
+    from .profiles import get_profile, list_profiles
+    from .config import Config
+
+    console.print(f"[bold green]🚀[/bold green] Creating new {profile} project: {name}")
+
+    # Validate profile
+    available_profiles = list_profiles()
+    if profile not in available_profiles:
+        console.print(f"[red]Error:[/red] Unknown profile '{profile}'. Available: {', '.join(available_profiles)}")
+        return
+
+    # Check if directory already exists
+    project_dir = Path(name)
+    if project_dir.exists():
+        console.print(f"[red]Error:[/red] Directory '{name}' already exists")
+        return
+
+    # Create project directory
+    project_dir.mkdir()
+    os.chdir(project_dir)
+
+    # Get profile and scaffold
+    profile_obj = get_profile(profile)
+    if profile_obj is None:
+        console.print(f"[red]Error:[/red] Failed to load profile '{profile}'")
+        return
+
+    # Create initial config
+    config = Config()
+    config.set("project.name", name)
+    config.set("project.package", name.replace("-", "_"))
+    config.set("project.profile", profile)
+    if template:
+        config.set("api.template", template)
+
+    # Scaffold project
+    try:
+        profile_obj.scaffold(name, config)
+        config.save()
+        console.print(f"[green]✓[/green] Project '{name}' created successfully!")
+        console.print(f"[dim]Profile: {profile}[/dim]")
+        console.print(f"[dim]Next: cd {name} && anvil dev[/dim]")
+    except Exception as e:
+        console.print(f"[red]Error:[/red] Failed to scaffold project: {e}")
+        return
 
 
 @main.command()

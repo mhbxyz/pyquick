@@ -23,12 +23,13 @@ def test_cli_version():
 
 
 def test_new_command():
-    """Test new command placeholder."""
+    """Test new command with valid arguments."""
     runner = CliRunner()
-    result = runner.invoke(main, ["new"])
-    assert result.exit_code == 0
-    assert "Creating new project" in result.output
-    assert "Not implemented yet" in result.output
+    with runner.isolated_filesystem():
+        result = runner.invoke(main, ["new", "testproject", "--profile", "lib"])
+        assert result.exit_code == 0
+        assert "Creating new lib project: testproject" in result.output
+        assert "Project 'testproject' created successfully!" in result.output
 
 
 def test_dev_command():
