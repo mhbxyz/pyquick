@@ -1,10 +1,11 @@
 """Tests for run command execution."""
+from tomllib import load
 
 import pytest
 from unittest.mock import patch, MagicMock
 
 from anvil.config import Config
-from anvil.run import RunExecutor
+from anvil.commands.run import RunExecutor
 
 
 class TestRunExecutor:
@@ -16,7 +17,7 @@ class TestRunExecutor:
         executor = RunExecutor(config)
         assert executor.config == config
 
-    @patch("anvil.run.RunExecutor.run_command")
+    @patch("anvil.commands.run.RunExecutor.run_command")
     def test_run_lib_profile_no_entry(self, mock_run_cmd):
         """Test running lib profile with no entry point."""
         config = Config()
@@ -30,7 +31,7 @@ class TestRunExecutor:
         assert result == 1
         mock_run_cmd.assert_not_called()
 
-    @patch("anvil.run.RunExecutor.run_command")
+    @patch("anvil.commands.run.RunExecutor.run_command")
     def test_run_lib_profile_with_main(self, mock_run_cmd):
         """Test running lib profile with __main__.py."""
         mock_run_cmd.return_value = 0
@@ -42,12 +43,12 @@ class TestRunExecutor:
         executor = RunExecutor(config)
 
         # Mock that __main__.py exists
-        with patch("anvil.run.Path.exists", return_value=True):
+        with patch("pathlib.Path.exists", return_value=True):
             result = executor.run()
             assert result == 0
             mock_run_cmd.assert_called_with(["python", "-m", "testlib"])
 
-    @patch("anvil.run.RunExecutor.run_command")
+    @patch("anvil.commands.run.RunExecutor.run_command")
     def test_run_cli_profile(self, mock_run_cmd):
         """Test running CLI profile."""
         mock_run_cmd.return_value = 0
@@ -58,12 +59,12 @@ class TestRunExecutor:
 
         executor = RunExecutor(config)
 
-        with patch("anvil.run.Path.exists", return_value=True):
+        with patch("pathlib.Path.exists", return_value=True):
             result = executor.run()
             assert result == 0
             mock_run_cmd.assert_called_with(["python", "-m", "testcli"])
 
-    @patch("anvil.run.RunExecutor.run_command")
+    @patch("anvil.commands.run.RunExecutor.run_command")
     def test_run_api_profile_fastapi(self, mock_run_cmd):
         """Test running API profile with FastAPI."""
         mock_run_cmd.return_value = 0
@@ -84,7 +85,7 @@ class TestRunExecutor:
                 ["uvicorn", "testapi.app:app", "--host", "127.0.0.1", "--port", "8000"]
             )
 
-    @patch("anvil.run.RunExecutor.run_command")
+    @patch("anvil.commands.run.RunExecutor.run_command")
     def test_run_api_profile_flask(self, mock_run_cmd):
         """Test running API profile with Flask."""
         mock_run_cmd.return_value = 0
@@ -141,7 +142,7 @@ class TestRunExecutor:
 
         assert result == ["python", "-m", "myapp"]
 
-    @patch("anvil.run.Path.exists")
+    @patch("pathlib.Path.exists")
     @patch("builtins.open")
     def test_resolve_entry_point_console_script(self, mock_open, mock_exists):
         """Test resolving console script from pyproject.toml."""
@@ -154,7 +155,7 @@ class TestRunExecutor:
         mock_open.return_value = mock_file
 
         with patch(
-            "anvil.run.tomllib.load",
+            "tomllib.load",
             return_value={"project": {"scripts": {"myscript": "myapp:main"}}},
         ):
             config = Config()

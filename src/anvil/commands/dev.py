@@ -11,14 +11,13 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
 
 from rich.console import Console
 from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+import watchdog.observers as wd_observers
 
-from .config import Config
-from .tools import ToolExecutor
+from ..config import Config
+from ..tools import ToolExecutor
 
 console = Console()
 
@@ -106,6 +105,15 @@ class DevRunner:
             hasattr(sys.stdin, "isatty") and sys.stdin.isatty()
         )
 
+        # If invoked from the CLI under pytest, avoid starting file watchers
+        # or spawning nested test processes. Run checks once and exit.
+        if os.environ.get("ANVIL_FROM_CLI_DEV") and os.environ.get("PYTEST_CURRENT_TEST"):
+            console.print("[dim]Detected pytest; running one-shot checks only[/dim]")
+            event_handler = DevEventHandler(self.config, self.executor)
+            console.print("[dim]Running initial checks...[/dim]")
+            event_handler._run_checks()
+            return
+
         # Get watch paths from config
         watch_paths = self.config.get("dev.watch", ["src", "tests"])
         profile = self.config.get("project.profile", "lib")
@@ -126,7 +134,7 @@ class DevRunner:
             return
 
         # Set up file watcher
-        observer = Observer()
+        observer = wd_observers.Observer()
         event_handler = DevEventHandler(self.config, self.executor)
 
         for watch_dir in watch_dirs:

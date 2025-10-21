@@ -1,9 +1,7 @@
 """Main CLI entry point for Anvil."""
 
 import os
-import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -86,7 +84,7 @@ def dev() -> None:
     """Run project in development mode with watch."""
     from .config import Config
     from .tools import ToolExecutor
-    from .dev import DevRunner
+    from .commands.dev import DevRunner
 
     console.print("[bold blue]👀[/bold blue] Starting development mode...")
 
@@ -116,7 +114,9 @@ def dev() -> None:
 def run() -> None:
     """Run the canonical executable for the project."""
     from .config import Config
-    from .run import RunExecutor
+    # Use absolute import to avoid any ambiguity with relative imports
+    # inside Click invocation contexts.
+    from .commands.run import RunExecutor
 
     console.print("[bold purple]▶️[/bold purple] Running project...")
 
@@ -219,8 +219,18 @@ def check() -> None:
         console.print("  [red]✗[/red] Formatting check failed")
         all_passed = False
 
-    # Run type checking if enabled
-    types_enabled = config.get("features.types", False)
+    # Run type checking only if explicitly enabled (boolean or dict flag).
+    # This avoids accidentally running heavy type checkers during tests
+    # when users set a string like "pyright" as the tool preference.
+    types_setting = config.get("features.types", False)
+    types_enabled = (
+        (isinstance(types_setting, bool) and types_setting is True)
+        or (
+            isinstance(types_setting, dict)
+            and bool(types_setting.get("enabled", False))
+        )
+    )
+
     if types_enabled:
         console.print("  [dim]Running type checker...[/dim]")
         type_exit_code = executor.run_type_check()

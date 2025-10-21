@@ -1,11 +1,15 @@
 """Tests for development mode functionality."""
+from time import sleep
+from pathlib import Path
 
 import pytest
 from unittest.mock import patch, MagicMock
 
+from watchdog.observers import Observer
+
 from anvil.config import Config
 from anvil.tools import ToolExecutor
-from anvil.dev import DevRunner, DevEventHandler
+from anvil.commands.dev import DevRunner, DevEventHandler
 
 
 class TestDevEventHandler:
@@ -21,7 +25,7 @@ class TestDevEventHandler:
         assert handler.executor == executor
         assert handler.debounce_ms == 150  # default value
 
-    @patch("anvil.dev.DevEventHandler._run_checks")
+    @patch("anvil.commands.dev.DevEventHandler._run_checks")
     def test_on_any_event_directory_ignored(self, mock_run_checks):
         """Test that directory events are ignored."""
         config = Config()
@@ -34,7 +38,7 @@ class TestDevEventHandler:
         handler.on_any_event(mock_event)
         mock_run_checks.assert_not_called()
 
-    @patch("anvil.dev.DevEventHandler._run_checks")
+    @patch("anvil.commands.dev.DevEventHandler._run_checks")
     def test_on_any_event_pyc_ignored(self, mock_run_checks):
         """Test that .pyc files are ignored."""
         config = Config()
@@ -48,7 +52,7 @@ class TestDevEventHandler:
         handler.on_any_event(mock_event)
         mock_run_checks.assert_not_called()
 
-    @patch("anvil.dev.DevEventHandler._run_checks")
+    @patch("anvil.commands.dev.DevEventHandler._run_checks")
     def test_on_any_event_debounced(self, mock_run_checks):
         """Test event debouncing."""
         config = Config()
@@ -67,9 +71,9 @@ class TestDevEventHandler:
         handler.on_any_event(mock_event)
         assert mock_run_checks.call_count == 1
 
-    @patch("anvil.dev.ToolExecutor.run_ruff_check")
-    @patch("anvil.dev.ToolExecutor.run_ruff_format")
-    @patch("anvil.dev.ToolExecutor.run_pytest")
+    @patch("anvil.commands.dev.ToolExecutor.run_ruff_check")
+    @patch("anvil.commands.dev.ToolExecutor.run_ruff_format")
+    @patch("anvil.commands.dev.ToolExecutor.run_pytest")
     def test_run_checks_all_pass(self, mock_pytest, mock_format, mock_lint):
         """Test running checks when all pass."""
         mock_lint.return_value = 0
@@ -99,8 +103,8 @@ class TestDevRunner:
         assert runner.config == config
         assert runner.executor == executor
 
-    @patch("anvil.dev.Observer")
-    @patch("anvil.dev.DevEventHandler")
+    @patch("watchdog.observers.Observer")
+    @patch("anvil.commands.dev.DevEventHandler")
     def test_run_lib_profile(self, mock_handler_class, mock_observer_class):
         """Test running dev mode for lib profile."""
         mock_observer = MagicMock()
@@ -118,9 +122,9 @@ class TestDevRunner:
 
         # Mock Path.exists and is_dir
         with (
-            patch("anvil.dev.Path.exists", return_value=True),
-            patch("anvil.dev.Path.is_dir", return_value=True),
-            patch("anvil.dev.time.sleep"),
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.is_dir", return_value=True),
+            patch("time.sleep"),
         ):
             # Should not call _run_api_server for lib profile
             with patch.object(runner, "_run_api_server") as mock_api_server:
@@ -131,8 +135,8 @@ class TestDevRunner:
             mock_observer.start.assert_called_once()
             mock_observer.stop.assert_called_once()
 
-    @patch("anvil.dev.Observer")
-    @patch("anvil.dev.DevEventHandler")
+    @patch("watchdog.observers.Observer")
+    @patch("anvil.commands.dev.DevEventHandler")
     def test_run_api_profile(self, mock_handler_class, mock_observer_class):
         """Test running dev mode for API profile."""
         mock_observer = MagicMock()
@@ -149,8 +153,8 @@ class TestDevRunner:
         runner = DevRunner(config, executor)
 
         with (
-            patch("anvil.dev.Path.exists", return_value=True),
-            patch("anvil.dev.Path.is_dir", return_value=True),
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.is_dir", return_value=True),
         ):
             with patch.object(runner, "_run_api_server") as mock_api_server:
                 mock_api_server.return_value = None  # Prevent actual server start
@@ -160,7 +164,7 @@ class TestDevRunner:
                 # Should call API server for API profile
                 mock_api_server.assert_called_once()
 
-    @patch("anvil.dev.ToolExecutor.run_command")
+    @patch("anvil.commands.dev.ToolExecutor.run_command")
     def test_run_fastapi_server(self, mock_run_cmd):
         """Test running FastAPI server."""
         mock_run_cmd.return_value = 0
@@ -186,7 +190,7 @@ class TestDevRunner:
                 ]
             )
 
-    @patch("anvil.dev.ToolExecutor.run_command")
+    @patch("anvil.commands.dev.ToolExecutor.run_command")
     def test_run_flask_server(self, mock_run_cmd):
         """Test running Flask server."""
         mock_run_cmd.return_value = 0

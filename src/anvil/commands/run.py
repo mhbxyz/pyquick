@@ -10,8 +10,8 @@ except ImportError:  # pragma: no cover - fallback for older Python
 
 from rich.console import Console
 
-from .config import Config
-from .tools import ToolExecutor
+from ..config import Config
+from ..tools import ToolExecutor
 
 console = Console()
 
