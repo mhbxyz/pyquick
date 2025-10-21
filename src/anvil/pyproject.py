@@ -16,7 +16,9 @@ class PyProjectGenerator:
         """Generate pyproject.toml content based on project configuration."""
         profile = self.config.get("project.profile", "lib")
         project_name = self.config.get("project.name", "myproject")
-        package_name = self.config.get("project.package", project_name.replace("-", "_"))
+        package_name = self.config.get(
+            "project.package", project_name.replace("-", "_")
+        )
         python_version = self.config.get("project.python", "3.11")
 
         # Base project configuration
@@ -27,9 +29,7 @@ class PyProjectGenerator:
                 "description": f"A {profile} project",
                 "readme": "README.md",
                 "requires-python": f">={python_version}",
-                "authors": [
-                    {"name": "Your Name", "email": "your.email@example.com"}
-                ],
+                "authors": [{"name": "Your Name", "email": "your.email@example.com"}],
                 "keywords": ["python", profile],
                 "classifiers": [
                     "Development Status :: 3 - Alpha",
@@ -47,14 +47,10 @@ class PyProjectGenerator:
             "tool": {
                 "hatch": {
                     "build": {
-                        "targets": {
-                            "wheel": {
-                                "packages": [f"src/{package_name}"]
-                            }
-                        }
+                        "targets": {"wheel": {"packages": [f"src/{package_name}"]}}
                     }
                 }
-            }
+            },
         }
 
         # Add profile-specific configuration
@@ -82,7 +78,9 @@ class PyProjectGenerator:
 
         return base_deps
 
-    def _add_lib_config(self, pyproject: Dict[str, Any], package_name: str) -> Dict[str, Any]:
+    def _add_lib_config(
+        self, pyproject: Dict[str, Any], package_name: str
+    ) -> Dict[str, Any]:
         """Add library-specific configuration."""
         # Add optional dependencies for development
         pyproject["project"]["optional-dependencies"] = {
@@ -112,7 +110,9 @@ class PyProjectGenerator:
 
         return pyproject
 
-    def _add_cli_config(self, pyproject: Dict[str, Any], package_name: str, project_name: str) -> Dict[str, Any]:
+    def _add_cli_config(
+        self, pyproject: Dict[str, Any], package_name: str, project_name: str
+    ) -> Dict[str, Any]:
         """Add CLI-specific configuration."""
         # Add console script
         pyproject["project"]["scripts"] = {
@@ -138,7 +138,9 @@ class PyProjectGenerator:
 
         return pyproject
 
-    def _add_api_config(self, pyproject: Dict[str, Any], package_name: str) -> Dict[str, Any]:
+    def _add_api_config(
+        self, pyproject: Dict[str, Any], package_name: str
+    ) -> Dict[str, Any]:
         """Add API-specific configuration."""
         # Add console script for running the API
         project_name = self.config.get("project.name", "myapi")
@@ -173,7 +175,9 @@ class PyProjectGenerator:
 
         return pyproject
 
-    def _add_service_config(self, pyproject: Dict[str, Any], package_name: str) -> Dict[str, Any]:
+    def _add_service_config(
+        self, pyproject: Dict[str, Any], package_name: str
+    ) -> Dict[str, Any]:
         """Add service-specific configuration."""
         # Add dev dependencies
         pyproject["project"]["optional-dependencies"] = {
@@ -212,7 +216,9 @@ class PyProjectGenerator:
                     lines.append(f"\n[{prefix}.{key}]")
                 else:
                     lines.append(f"\n[{key}]")
-                lines.append(self._dict_to_toml(value, f"{prefix}.{key}" if prefix else key))
+                lines.append(
+                    self._dict_to_toml(value, f"{prefix}.{key}" if prefix else key)
+                )
             elif isinstance(value, list):
                 if prefix:
                     lines.append(f"\n[{prefix}.{key}]")

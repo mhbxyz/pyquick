@@ -69,15 +69,28 @@ class RunExecutor:
                 if self.executor.detector.is_available("uvicorn"):
                     return ["uvicorn", entry, "--host", "127.0.0.1", "--port", "8000"]
                 else:
-                    console.print("[yellow]Warning:[/yellow] uvicorn not available for FastAPI app")
+                    console.print(
+                        "[yellow]Warning:[/yellow] uvicorn not available for FastAPI app"
+                    )
             elif template == "flask":
                 # Use gunicorn or flask for WSGI
                 if self.executor.detector.is_available("gunicorn"):
                     return ["gunicorn", "--bind", "127.0.0.1:8000", entry]
                 elif self.executor.detector.is_available("flask"):
-                    return ["flask", "--app", entry, "run", "--host", "127.0.0.1", "--port", "5000"]
+                    return [
+                        "flask",
+                        "--app",
+                        entry,
+                        "run",
+                        "--host",
+                        "127.0.0.1",
+                        "--port",
+                        "5000",
+                    ]
                 else:
-                    console.print("[yellow]Warning:[/yellow] No WSGI server available for Flask app")
+                    console.print(
+                        "[yellow]Warning:[/yellow] No WSGI server available for Flask app"
+                    )
 
         return None
 
@@ -89,6 +102,7 @@ class RunExecutor:
 
         try:
             import tomllib
+
             with open(pyproject_path, "rb") as f:
                 data = tomllib.load(f)
 
@@ -123,15 +137,30 @@ class RunExecutor:
         if template == "fastapi":
             app_path = f"{package_name}.app:app"
             if self.executor.detector.is_available("uvicorn"):
-                return self.executor.run_command(["uvicorn", app_path, "--host", "127.0.0.1", "--port", "8000"])
+                return self.executor.run_command(
+                    ["uvicorn", app_path, "--host", "127.0.0.1", "--port", "8000"]
+                )
             else:
-                console.print("[yellow]Warning:[/yellow] uvicorn not available for FastAPI")
+                console.print(
+                    "[yellow]Warning:[/yellow] uvicorn not available for FastAPI"
+                )
                 return 1
 
         elif template == "flask":
             app_path = f"{package_name}.app"
             if self.executor.detector.is_available("flask"):
-                return self.executor.run_command(["flask", "--app", app_path, "run", "--host", "127.0.0.1", "--port", "5000"])
+                return self.executor.run_command(
+                    [
+                        "flask",
+                        "--app",
+                        app_path,
+                        "run",
+                        "--host",
+                        "127.0.0.1",
+                        "--port",
+                        "5000",
+                    ]
+                )
             else:
                 console.print("[yellow]Warning:[/yellow] flask not available")
                 return 1
@@ -146,7 +175,9 @@ class RunExecutor:
         # Try service.py
         service_file = Path("src") / package_name / "service.py"
         if service_file.exists():
-            return self.executor.run_command(["python", "-m", f"{package_name}.service"])
+            return self.executor.run_command(
+                ["python", "-m", f"{package_name}.service"]
+            )
 
         console.print("[yellow]Warning:[/yellow] No service.py found")
         return 1
@@ -161,5 +192,7 @@ class RunExecutor:
             return self.executor.run_command(["python", "-m", package_name])
 
         console.print("[yellow]Warning:[/yellow] Library has no runnable entry point")
-        console.print("[dim]Use 'anvil test' to run tests or 'anvil check' for validation[/dim]")
+        console.print(
+            "[dim]Use 'anvil test' to run tests or 'anvil check' for validation[/dim]"
+        )
         return 1

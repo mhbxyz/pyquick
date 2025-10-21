@@ -117,7 +117,9 @@ def run() -> None:
     try:
         exit_code = run_executor.run()
         if exit_code != 0:
-            console.print(f"[red]Error:[/red] Command failed with exit code {exit_code}")
+            console.print(
+                f"[red]Error:[/red] Command failed with exit code {exit_code}"
+            )
     except Exception as e:
         console.print(f"[red]Error:[/red] Failed to run project: {e}")
 

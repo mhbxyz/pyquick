@@ -194,6 +194,7 @@ class ToolExecutor:
 
         # No formatter available
         return 1
+
     def run_uv_build(self, wheel: bool = True, sdist: bool = True) -> int:
         """Run uv build to create distributions.
 
@@ -205,12 +206,16 @@ class ToolExecutor:
             Exit code
         """
         if not self.detector.is_available("uv"):
-            console.print("[yellow]Warning:[/yellow] uv not available, trying python -m build")
+            console.print(
+                "[yellow]Warning:[/yellow] uv not available, trying python -m build"
+            )
             if self.detector.is_available("python"):
                 cmd = ["python", "-m", "build"]
                 return self.run_command(cmd)
             else:
-                console.print("[red]Error:[/red] Neither uv nor python available for building")
+                console.print(
+                    "[red]Error:[/red] Neither uv nor python available for building"
+                )
                 return 1
 
         cmd = ["uv", "build"]
