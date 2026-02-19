@@ -4,11 +4,11 @@ profile = "api"
 template = "fastapi"
 
 [tooling]
-uv = "uv"
-ruff = "ruff"
-pytest = "pytest"
-pyright = "pyright"
-uvicorn = "uvicorn"
+packaging = "uv"
+linting = "ruff"
+testing = "pytest"
+typing = "pyright"
+running = "uvicorn"
 
 [dev]
 reload = true

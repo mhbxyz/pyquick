@@ -14,6 +14,11 @@ def test_load_config_returns_defaults_when_file_missing(tmp_path: Path) -> None:
 
     assert config.project.profile == "api"
     assert config.project.template == "fastapi"
+    assert config.tooling.packaging == "uv"
+    assert config.tooling.linting == "ruff"
+    assert config.tooling.testing == "pytest"
+    assert config.tooling.typing == "pyright"
+    assert config.tooling.running == "uvicorn"
     assert config.dev.watch == ("src", "tests")
     assert config.checks.pipeline == ("lint", "type", "test")
 
@@ -57,6 +62,19 @@ def test_load_config_rejects_unknown_section_key(tmp_path: Path) -> None:
 [run]
 port = 8000
 extra = true
+""".strip(),
+    )
+
+    with pytest.raises(ConfigError, match="Unknown key"):
+        load_config(tmp_path)
+
+
+def test_load_config_rejects_old_tooling_keys(tmp_path: Path) -> None:
+    _write_config(
+        tmp_path,
+        """
+[tooling]
+uv = "uv"
 """.strip(),
     )
 

@@ -17,11 +17,11 @@ class ProjectSection:
 
 @dataclass(slots=True, frozen=True)
 class ToolingSection:
-    uv: str = "uv"
-    ruff: str = "ruff"
-    pytest: str = "pytest"
-    pyright: str = "pyright"
-    uvicorn: str = "uvicorn"
+    packaging: str = "uv"
+    linting: str = "ruff"
+    testing: str = "pytest"
+    typing: str = "pyright"
+    running: str = "uvicorn"
 
 
 @dataclass(slots=True, frozen=True)
@@ -172,14 +172,18 @@ def _parse_project(raw: dict[str, Any]) -> ProjectSection:
 
 
 def _parse_tooling(raw: dict[str, Any]) -> ToolingSection:
-    _assert_allowed_keys(raw, {"uv", "ruff", "pytest", "pyright", "uvicorn"}, context="[tooling]")
+    _assert_allowed_keys(
+        raw,
+        {"packaging", "linting", "testing", "typing", "running"},
+        context="[tooling]",
+    )
 
     return ToolingSection(
-        uv=_read_string(raw, "uv", default="uv", context="[tooling]"),
-        ruff=_read_string(raw, "ruff", default="ruff", context="[tooling]"),
-        pytest=_read_string(raw, "pytest", default="pytest", context="[tooling]"),
-        pyright=_read_string(raw, "pyright", default="pyright", context="[tooling]"),
-        uvicorn=_read_string(raw, "uvicorn", default="uvicorn", context="[tooling]"),
+        packaging=_read_string(raw, "packaging", default="uv", context="[tooling]"),
+        linting=_read_string(raw, "linting", default="ruff", context="[tooling]"),
+        testing=_read_string(raw, "testing", default="pytest", context="[tooling]"),
+        typing=_read_string(raw, "typing", default="pyright", context="[tooling]"),
+        running=_read_string(raw, "running", default="uvicorn", context="[tooling]"),
     )
 
 
