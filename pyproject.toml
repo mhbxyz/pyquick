@@ -13,6 +13,7 @@ authors = [{ name = "PyIgnite Team" }]
 dependencies = [
   "rich>=13.9.0",
   "typer>=0.16.0",
+  "watchfiles>=1.1.0",
 ]
 
 [project.optional-dependencies]

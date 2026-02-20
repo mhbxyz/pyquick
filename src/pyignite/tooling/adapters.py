@@ -110,11 +110,7 @@ class ToolAdapters:
         )
 
     def run(self, key: ToolKey, args: Sequence[str] = (), cwd: Path | None = None) -> CommandResult:
-        spec = self.ensure_available(key)
-        if key == ToolKey.PACKAGING:
-            command = (spec.executable, *args)
-        else:
-            command = (self._config.tooling.packaging, "run", spec.executable, *args)
+        command = self.command(key=key, args=args)
         completed = self._runner.run(command=command, cwd=cwd or self._config.root_dir)
 
         return CommandResult(
@@ -123,3 +119,9 @@ class ToolAdapters:
             stdout=completed.stdout,
             stderr=completed.stderr,
         )
+
+    def command(self, key: ToolKey, args: Sequence[str] = ()) -> tuple[str, ...]:
+        spec = self.ensure_available(key)
+        if key == ToolKey.PACKAGING:
+            return (spec.executable, *args)
+        return (self._config.tooling.packaging, "run", spec.executable, *args)
