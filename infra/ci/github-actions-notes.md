@@ -11,5 +11,6 @@ Planned baseline pipeline stages:
 - perf guardrails (`scripts/run_benchmarks.sh`, fail mode)
 - package build validation (`.github/workflows/python-package.yml`)
 - trusted publishing (`.github/workflows/publish.yml`, TestPyPI -> PyPI)
+- GitHub release automation (`.github/workflows/publish.yml`, notes + artifacts)
 
 This file documents the intended shape before a full workflow is added.

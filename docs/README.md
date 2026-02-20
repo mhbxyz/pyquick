@@ -38,6 +38,7 @@ Use this page as the primary entry point for project docs.
 - Alpha triage process: [triage-alpha-process.md](release/triage-alpha-process.md)
 - Post-alpha roadmap: [post-alpha-roadmap.md](release/post-alpha-roadmap.md)
 - PyPI trusted publishing: [pypi-publishing.md](release/pypi-publishing.md)
+- GitHub release automation: [github-releases.md](release/github-releases.md)
 
 ## ADR
 

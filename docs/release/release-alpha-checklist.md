@@ -21,6 +21,7 @@ Mark each gate as `pass`, `blocked`, or `waived` (with rationale).
 | Quality tooling | `uv run pyqck check` | Deterministic check output, zero failures | Engineering | pending |
 | Perf guardrails | `scripts/run_benchmarks.sh` | No regression beyond configured threshold | Performance Owner | pending |
 | Docs readiness | Manual review of alpha docs links and command accuracy | Quickstart and troubleshooting are executable | DX/Docs Owner | pending |
+| GitHub release artifacts | Verify release notes + `.whl` and `.tar.gz` assets on tagged release | Release entry is complete and downloadable | Release Manager | pending |
 | Release communication | Internal announcement draft + channel prepared | Audience, scope, known limits, feedback path included | Product/PM | pending |
 
 ## Ownership and Sign-off Matrix
@@ -57,7 +58,8 @@ Record rehearsal outcome:
 1. Confirm release commit hash and milestone closure state.
 2. Confirm docs links resolve from `README.md`.
 3. Confirm trusted publishing configuration from [PyPI trusted publishing](pypi-publishing.md).
-4. Publish internal announcement including:
+4. Confirm GitHub release automation details from [GitHub release automation](github-releases.md).
+5. Publish internal announcement including:
    - alpha scope
    - known constraints (including delegated `uv` backend)
    - how to onboard ([Alpha quickstart](../getting-started/quickstart-alpha.md))

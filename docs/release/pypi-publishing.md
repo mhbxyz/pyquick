@@ -15,6 +15,7 @@ This guide documents how `pyqck` is published to TestPyPI and PyPI via GitHub OI
   - publishes to TestPyPI
   - verifies install from TestPyPI
   - publishes to PyPI
+  - creates GitHub Release with wheel/sdist assets
 
 ## One-time setup on TestPyPI and PyPI
 
@@ -42,6 +43,7 @@ Expected sequence:
 2. publish TestPyPI
 3. install smoke from TestPyPI
 4. publish PyPI
+5. create GitHub Release
 
 ## Troubleshooting
 
@@ -53,3 +55,4 @@ Expected sequence:
 
 - [Release and Feedback index](README.md)
 - [Alpha release checklist](release-alpha-checklist.md)
+- [GitHub release automation](github-releases.md)

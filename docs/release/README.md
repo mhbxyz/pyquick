@@ -7,3 +7,4 @@
 - [Alpha triage process](triage-alpha-process.md)
 - [Post-alpha roadmap](post-alpha-roadmap.md)
 - [PyPI trusted publishing](pypi-publishing.md)
+- [GitHub release automation](github-releases.md)

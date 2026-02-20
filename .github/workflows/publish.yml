@@ -16,6 +16,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure tag matches package version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          tag = os.environ["TAG"]
+          if not tag.startswith("v"):
+              raise SystemExit(f"Expected version tag starting with 'v', got: {tag}")
+
+          version = None
+          for line in Path("pyproject.toml").read_text(encoding="utf-8").splitlines():
+              if line.strip().startswith("version ="):
+                  version = line.split("=", 1)[1].strip().strip('"')
+                  break
+
+          if not version:
+              raise SystemExit("Could not read version from pyproject.toml")
+
+          expected = f"v{version}"
+          if tag != expected:
+              raise SystemExit(
+                  f"Tag/version mismatch: tag={tag} but pyproject.toml version={version}"
+              )
+          print(f"Tag/version check passed: {tag}")
+          PY
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -100,3 +129,34 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    runs-on: ubuntu-latest
+    needs: publish-pypi
+    permissions:
+      contents: write
+    steps:
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Verify release assets exist
+        run: |
+          ls -lah dist
+          test -n "$(ls -1 dist/*.whl 2>/dev/null)"
+          test -n "$(ls -1 dist/*.tar.gz 2>/dev/null)"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          body: |
+            ## Migration notes
+            - CLI command: `pyqck`
+            - Config file: `pyquick.toml`
+            - Repository: `mhbxyz/pyquick`
