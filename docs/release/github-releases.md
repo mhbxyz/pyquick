@@ -8,6 +8,11 @@ PyQuick creates GitHub Releases from version tags and attaches package artifacts
 
 Release automation runs when a tag matching `v*` is pushed.
 
+Tag creation source depends on release mode:
+
+- Manual mode: `.github/workflows/release-manual.yml` creates commit + tag.
+- release-please mode: `.github/workflows/release-please.yml` creates tag after release PR merge.
+
 ```bash
 git tag v0.2.0
 git push origin v0.2.0
@@ -41,4 +46,5 @@ Workflow: `.github/workflows/publish.yml`
 ## See Also
 
 - [PyPI trusted publishing](pypi-publishing.md)
+- [Releasing PyQuick](releasing.md)
 - [Alpha release checklist](release-alpha-checklist.md)

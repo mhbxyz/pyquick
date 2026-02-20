@@ -17,6 +17,15 @@ This guide documents how `pyqck` is published to TestPyPI and PyPI via GitHub OI
   - publishes to PyPI
   - creates GitHub Release with wheel/sdist assets
 
+## Release trigger paths
+
+`publish.yml` is tag-driven. Tags are created by one of two controlled flows:
+
+1. Manual release workflow: `.github/workflows/release-manual.yml`
+2. release-please flow: `.github/workflows/release-please.yml` after release PR review/merge
+
+Both paths preserve manual approvals on protected environments (`testpypi`, `pypi`).
+
 ## One-time setup on TestPyPI and PyPI
 
 Configure **Trusted Publisher** on both indexes with:
@@ -28,9 +37,9 @@ Configure **Trusted Publisher** on both indexes with:
 
 No API token is required once trusted publishing is configured.
 
-## Release trigger
+## Direct tag trigger (fallback)
 
-Publish flow is tag-driven:
+Publish can also be triggered directly by pushing a release tag:
 
 ```bash
 git tag v0.1.0
@@ -54,5 +63,6 @@ Expected sequence:
 ## See Also
 
 - [Release and Feedback index](README.md)
+- [Releasing PyQuick](releasing.md)
 - [Alpha release checklist](release-alpha-checklist.md)
 - [GitHub release automation](github-releases.md)

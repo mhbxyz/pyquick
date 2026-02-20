@@ -1,0 +1,177 @@
+name: release-manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Semantic version bump"
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      preflight:
+        description: "Run release preflight checks"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure workflow runs on main
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "Release workflow must be dispatched from main (got ${GITHUB_REF_NAME})"
+            exit 1
+          fi
+
+      - name: Ensure latest CI on main is green (best effort)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const response = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: "python-package.yml",
+              branch: "main",
+              per_page: 1,
+            })
+
+            const latest = response.data.workflow_runs[0]
+            if (!latest) {
+              core.info("No recent python-package run found on main; continuing.")
+              return
+            }
+
+            if (latest.conclusion !== "success") {
+              core.setFailed(`Latest python-package run on main is not green: ${latest.conclusion}`)
+              return
+            }
+
+            core.info("Latest python-package run on main is green.")
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Run preflight checks
+        if: ${{ inputs.preflight }}
+        run: |
+          set -euo pipefail
+          uv sync --extra dev
+          uv run pytest
+          scripts/run_benchmarks.sh
+
+      - name: Ensure working tree is clean
+        run: |
+          set -euo pipefail
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Working tree is not clean before release bump"
+            git status --short
+            exit 1
+          fi
+
+      - name: Compute next version and update pyproject
+        id: bump
+        env:
+          BUMP_KIND: ${{ inputs.bump }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          bump = os.environ["BUMP_KIND"]
+          path = Path("pyproject.toml")
+          text = path.read_text(encoding="utf-8")
+
+          match = re.search(r'^version\s*=\s*"(\d+)\.(\d+)\.(\d+)"\s*$', text, re.MULTILINE)
+          if not match:
+              raise SystemExit("Could not parse version from pyproject.toml")
+
+          major, minor, patch = (int(match.group(i)) for i in range(1, 4))
+          if bump == "major":
+              major += 1
+              minor = 0
+              patch = 0
+          elif bump == "minor":
+              minor += 1
+              patch = 0
+          elif bump == "patch":
+              patch += 1
+          else:
+              raise SystemExit(f"Unsupported bump kind: {bump}")
+
+          next_version = f"{major}.{minor}.{patch}"
+          next_tag = f"v{next_version}"
+          updated = re.sub(
+              r'^version\s*=\s*"\d+\.\d+\.\d+"\s*$',
+              f'version = "{next_version}"',
+              text,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          path.write_text(updated, encoding="utf-8")
+
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as fh:
+              fh.write(f"version={next_version}\n")
+              fh.write(f"tag={next_tag}\n")
+          PY
+
+      - name: Fail if tag already exists
+        env:
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git fetch --tags origin
+          if git rev-parse --verify --quiet "refs/tags/${RELEASE_TAG}" >/dev/null; then
+            echo "Tag already exists: ${RELEASE_TAG}"
+            exit 1
+          fi
+
+      - name: Commit bump and create tag
+        env:
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "chore(release): ${RELEASE_TAG}"
+          git tag "${RELEASE_TAG}"
+
+      - name: Push commit and tag
+        env:
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git push origin HEAD:main
+          git push origin "${RELEASE_TAG}"
+
+      - name: Summary
+        env:
+          RELEASE_VERSION: ${{ steps.bump.outputs.version }}
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          echo "Release bump committed: ${RELEASE_VERSION}"
+          echo "Tag pushed: ${RELEASE_TAG}"
+          echo "publish workflow should run from the pushed tag"
