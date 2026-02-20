@@ -25,10 +25,19 @@ pyignite check
 
 ## Quick Navigation
 
-- Docs index: `docs/README.md`
-- Alpha quickstart: `docs/getting-started/quickstart-alpha.md`
-- Troubleshooting: `docs/getting-started/troubleshooting-alpha.md`
-- Release checklist: `docs/release/release-alpha-checklist.md`
+- Docs index: [docs/README.md](docs/README.md)
+- Alpha quickstart: [docs/getting-started/quickstart-alpha.md](docs/getting-started/quickstart-alpha.md)
+- Troubleshooting: [docs/getting-started/troubleshooting-alpha.md](docs/getting-started/troubleshooting-alpha.md)
+- Release checklist: [docs/release/release-alpha-checklist.md](docs/release/release-alpha-checklist.md)
+
+## Docs by Section
+
+- Getting Started: [docs/getting-started/README.md](docs/getting-started/README.md)
+- Reference: [docs/reference/README.md](docs/reference/README.md)
+- Dev Loop: [docs/dev-loop/README.md](docs/dev-loop/README.md)
+- Quality and Performance: [docs/quality/README.md](docs/quality/README.md)
+- Release and Feedback: [docs/release/README.md](docs/release/README.md)
+- Architecture Decisions: [docs/adr/README.md](docs/adr/README.md)
 
 ## Product Scope (v1 alpha)
 
