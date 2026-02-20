@@ -1,6 +1,6 @@
 import typer
 
-from pyignite.commands import check, dev, fmt, lint, run, test
+from pyignite.commands import check, dev, fmt, lint, new, run, test
 
 
 def register_commands(app: typer.Typer) -> None:
@@ -11,6 +11,7 @@ def register_commands(app: typer.Typer) -> None:
         "ignore_unknown_options": True,
     }
 
+    app.command(name="new")(new.new_command)
     app.command(name="dev")(dev.dev_command)
     app.command(name="run", context_settings=passthrough_context)(run.run_command)
     app.command(name="test", context_settings=passthrough_context)(test.test_command)
