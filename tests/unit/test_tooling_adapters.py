@@ -49,10 +49,10 @@ def _config(tmp_path: Path) -> PyIgniteConfig:
 def test_missing_tool_raises_actionable_error(tmp_path: Path) -> None:
     adapters = ToolAdapters(config=_config(tmp_path), which=lambda _: None)
 
-    with pytest.raises(ToolNotAvailableError, match="Configured tool") as exc_info:
+    with pytest.raises(ToolNotAvailableError, match="Configured runner") as exc_info:
         adapters.ensure_available(ToolKey.LINTING)
 
-    assert "[tooling].linting" in exc_info.value.hint
+    assert "[tooling].packaging" in exc_info.value.hint
 
 
 def test_run_propagates_subprocess_exit_and_output(tmp_path: Path) -> None:
@@ -65,11 +65,11 @@ def test_run_propagates_subprocess_exit_and_output(tmp_path: Path) -> None:
 
     result = adapters.run(ToolKey.TESTING, args=("-q",))
 
-    assert result.command == ("pytest", "-q")
+    assert result.command == ("uv", "run", "pytest", "-q")
     assert result.exit_code == 7
     assert result.stdout == "out"
     assert result.stderr == "err"
-    assert runner.last_command == ("pytest", "-q")
+    assert runner.last_command == ("uv", "run", "pytest", "-q")
     assert runner.last_cwd == tmp_path
 
 
@@ -91,6 +91,6 @@ def test_tooling_config_controls_executable_name(tmp_path: Path) -> None:
     test_result = adapters.run(ToolKey.TESTING)
     package_result = adapters.run(ToolKey.PACKAGING, args=("--version",))
 
-    assert lint_result.command[0] == "my-ruff"
-    assert test_result.command[0] == "my-pytest"
+    assert lint_result.command == ("my-uv", "run", "my-ruff", "check", ".")
+    assert test_result.command == ("my-uv", "run", "my-pytest")
     assert package_result.command[0] == "my-uv"

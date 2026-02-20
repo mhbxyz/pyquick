@@ -86,17 +86,31 @@ class ToolAdapters:
 
     def ensure_available(self, key: ToolKey) -> ToolSpec:
         spec = self.spec(key)
-        if self._which(spec.executable):
-            return spec
+        if key == ToolKey.PACKAGING:
+            if self._which(spec.executable):
+                return spec
+            raise ToolNotAvailableError(
+                f"Configured tool for `{key.value}` not found: `{spec.executable}`.",
+                spec.remediation_hint,
+            )
 
+        packaging_executable = self._config.tooling.packaging
+        if self._which(packaging_executable):
+            return spec
         raise ToolNotAvailableError(
-            f"Configured tool for `{key.value}` not found: `{spec.executable}`.",
-            spec.remediation_hint,
+            f"Configured runner for `{key.value}` not found: `{packaging_executable}`.",
+            (
+                f"Install `{packaging_executable}` and retry, or set `[tooling].packaging` "
+                "to a valid executable."
+            ),
         )
 
     def run(self, key: ToolKey, args: Sequence[str] = (), cwd: Path | None = None) -> CommandResult:
         spec = self.ensure_available(key)
-        command = (spec.executable, *args)
+        if key == ToolKey.PACKAGING:
+            command = (spec.executable, *args)
+        else:
+            command = (self._config.tooling.packaging, "run", spec.executable, *args)
         completed = self._runner.run(command=command, cwd=cwd or self._config.root_dir)
 
         return CommandResult(

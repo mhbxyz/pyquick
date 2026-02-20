@@ -65,6 +65,7 @@ This section makes #1 directly testable against follow-up issues.
   - Standardize subprocess error reporting with `[tooling]` category and hint.
   - Propagate subprocess exit behavior into command result (`1` on tool failure).
   - Resolve tools through semantic config keys: `packaging`, `linting`, `testing`, `typing`, `running`.
+  - Execute Python tooling via `packaging run <tool>` (default: `uv run <tool>`).
 - `#4` command wrappers:
   - Match command names and purpose exactly.
   - Emit consistent final status lines and deterministic pipeline order for `check`.
