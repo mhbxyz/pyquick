@@ -10,12 +10,13 @@ This document defines the generated structure for the v1 FastAPI scaffold profil
 ├── README.md
 ├── pyproject.toml
 ├── pyignite.toml
-├── <project_package>/
-│   ├── __init__.py
-│   ├── main.py
-│   └── api/
+├── src/
+│   └── <project_package>/
 │       ├── __init__.py
-│       └── router.py
+│       ├── main.py
+│       └── api/
+│           ├── __init__.py
+│           └── router.py
 └── tests/
     └── __init__.py
 ```
@@ -29,7 +30,7 @@ This document defines the generated structure for the v1 FastAPI scaffold profil
 
 ## Extension points
 
-- Add new API routes under `<project_package>/api/`
+- Add new API routes under `src/<project_package>/api/`
 - Split router modules by domain and include them from `router.py`
 - Add tests in `tests/` as routes/features are added
 

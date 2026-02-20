@@ -23,16 +23,17 @@ class FastAPITemplateContext:
 
 def build_fastapi_template(context: FastAPITemplateContext) -> dict[Path, str]:
     package = context.package_name
+    src_package = Path("src") / package
 
     files: dict[Path, str] = {
         Path(".gitignore"): _gitignore(),
         Path("README.md"): _readme(context),
         Path("pyproject.toml"): _pyproject(context),
         Path("pyignite.toml"): _pyignite_toml(context),
-        Path(package) / "__init__.py": _package_init(),
-        Path(package) / "main.py": _main_module(),
-        Path(package) / "api" / "__init__.py": _package_init(),
-        Path(package) / "api" / "router.py": _router_module(),
+        src_package / "__init__.py": _package_init(),
+        src_package / "main.py": _main_module(),
+        src_package / "api" / "__init__.py": _package_init(),
+        src_package / "api" / "router.py": _router_module(),
         Path("tests") / "__init__.py": _package_init(),
     }
 
@@ -66,13 +67,13 @@ uv run pyignite run
 
 ## Project layout
 
-- `{context.package_name}/main.py`: FastAPI app entrypoint
-- `{context.package_name}/api/router.py`: API router module
+- `src/{context.package_name}/main.py`: FastAPI app entrypoint
+- `src/{context.package_name}/api/router.py`: API router module
 - `pyignite.toml`: PyIgnite command defaults
 
 ## Next steps
 
-- Add routes in `{context.package_name}/api/router.py`
+- Add routes in `src/{context.package_name}/api/router.py`
 - Add tests under `tests/`
 """
 
@@ -110,9 +111,13 @@ testpaths = ["tests"]
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{context.package_name}"]
 """
 
 

@@ -15,8 +15,8 @@ def test_fastapi_template_uses_project_named_package() -> None:
     files = build_fastapi_template(context)
 
     assert context.package_name == "my_api"
-    assert Path("my_api/main.py") in files
-    assert Path("my_api/api/router.py") in files
+    assert Path("src/my_api/main.py") in files
+    assert Path("src/my_api/api/router.py") in files
     assert Path("pyignite.toml") in files
 
 
@@ -52,3 +52,14 @@ def test_fastapi_template_contains_project_metadata_and_quality_defaults() -> No
     assert "pytest" in pyproject
     assert "ruff" in pyproject
     assert "pyright" in pyproject
+
+
+def test_fastapi_template_puts_application_python_code_under_src() -> None:
+    context = FastAPITemplateContext.from_project_name("billing-api")
+    files = build_fastapi_template(context)
+
+    python_paths = [path for path in files if path.suffix == ".py"]
+    app_python_paths = [path for path in python_paths if not str(path).startswith("tests/")]
+
+    assert app_python_paths
+    assert all(str(path).startswith("src/") for path in app_python_paths)
