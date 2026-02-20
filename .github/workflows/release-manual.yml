@@ -57,6 +57,11 @@ jobs:
               return
             }
 
+            if (latest.status !== "completed") {
+              core.info(`Latest python-package run on main is still ${latest.status}; continuing.`)
+              return
+            }
+
             if (latest.conclusion !== "success") {
               core.setFailed(`Latest python-package run on main is not green: ${latest.conclusion}`)
               return
@@ -76,14 +81,16 @@ jobs:
         if: ${{ inputs.preflight }}
         run: |
           set -euo pipefail
-          uv sync --extra dev
+          uv sync --frozen --extra dev
           uv run pytest
           scripts/run_benchmarks.sh
+          rm -f benchmarks/current.alpha.json
 
       - name: Ensure working tree is clean
         run: |
           set -euo pipefail
-          git restore --source=HEAD --staged --worktree benchmarks/current.alpha.json || true
+          git restore --source=HEAD --staged --worktree uv.lock || true
+          rm -f benchmarks/current.alpha.json
           if [ -n "$(git status --porcelain)" ]; then
             echo "Working tree is not clean before release bump"
             git status --short
