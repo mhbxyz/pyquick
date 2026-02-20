@@ -83,6 +83,7 @@ jobs:
       - name: Ensure working tree is clean
         run: |
           set -euo pipefail
+          git restore --source=HEAD --staged --worktree benchmarks/current.alpha.json || true
           if [ -n "$(git status --porcelain)" ]; then
             echo "Working tree is not clean before release bump"
             git status --short
