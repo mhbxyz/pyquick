@@ -132,6 +132,9 @@ pyignite check
 - E2E testing guide: `docs/e2e-testing.md`
 - Performance benchmarks: `docs/perf-benchmarks.md`
 - Alpha perf baseline: `docs/perf-baseline-alpha.md`
+- Alpha quickstart: `docs/quickstart-alpha.md`
+- Alpha troubleshooting: `docs/troubleshooting-alpha.md`
+- Alpha feedback template: `docs/alpha-feedback-template.md`
 
 ---
 
