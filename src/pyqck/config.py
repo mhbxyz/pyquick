@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
-import tomllib
 from typing import Any
 
 from pyqck.scaffold.names import normalize_package_name
@@ -160,17 +160,33 @@ def _parse_project(raw: dict[str, Any]) -> ProjectSection:
 
     name = _read_string(raw, "name", default="myapi", context="[project]")
     profile = _read_string(raw, "profile", default="api", context="[project]")
-    template = _read_string(raw, "template", default="fastapi", context="[project]")
+    compatibility: dict[str, tuple[str, ...]] = {
+        "api": ("fastapi",),
+        "lib": ("baseline-lib",),
+    }
+    default_template = {
+        "api": "fastapi",
+        "lib": "baseline-lib",
+    }
 
-    if profile != "api":
+    if profile not in compatibility:
         raise ConfigError(
-            "`[project].profile` must be `api` in v1.",
-            'Use `profile = "api"`.',
+            f"`[project].profile` is unsupported: `{profile}`.",
+            'Use `profile = "api"` or `profile = "lib"`.',
         )
-    if template != "fastapi":
+
+    template = _read_string(
+        raw,
+        "template",
+        default=default_template[profile],
+        context="[project]",
+    )
+
+    if template not in compatibility[profile]:
+        allowed = ", ".join(f"`{item}`" for item in compatibility[profile])
         raise ConfigError(
-            "`[project].template` must be `fastapi` in v1.",
-            'Use `template = "fastapi"`.',
+            f"`[project].template` `{template}` is not valid for profile `{profile}`.",
+            f"Use one of {allowed} for profile `{profile}`.",
         )
 
     return ProjectSection(name=name, profile=profile, template=template)

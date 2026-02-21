@@ -52,8 +52,18 @@ def test_registry_rejects_incompatible_template_pair() -> None:
         registry.build(project_name="demo", profile="cli", template="fastapi")
 
 
-def test_default_registry_marks_reserved_profiles() -> None:
+def test_default_registry_resolves_lib_profile() -> None:
+    registry = build_default_scaffold_registry()
+
+    selection = registry.build(project_name="mylib", profile="lib")
+
+    assert selection.profile == "lib"
+    assert selection.template == "baseline-lib"
+    assert Path("pyproject.toml") in selection.files
+
+
+def test_default_registry_marks_cli_as_reserved_profile() -> None:
     registry = build_default_scaffold_registry()
 
     with pytest.raises(ReservedProfileError):
-        registry.build(project_name="demo", profile="lib")
+        registry.build(project_name="demo", profile="cli")

@@ -9,6 +9,7 @@ Use this page as the primary entry point for project docs.
 - Section index: [Getting Started](getting-started/README.md)
 - Install guide: [install.md](getting-started/install.md)
 - Alpha quickstart: [quickstart-alpha.md](getting-started/quickstart-alpha.md)
+- Library quickstart: [quickstart-lib.md](getting-started/quickstart-lib.md)
 - Alpha troubleshooting: [troubleshooting-alpha.md](getting-started/troubleshooting-alpha.md)
 
 ## Reference

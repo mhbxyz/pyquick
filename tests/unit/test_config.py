@@ -108,7 +108,38 @@ profile = "flask"
 """.strip(),
     )
 
-    with pytest.raises(ConfigError, match="must be `api`"):
+    with pytest.raises(ConfigError, match="is unsupported"):
+        load_config(tmp_path)
+
+
+def test_load_config_accepts_lib_profile_and_default_template(tmp_path: Path) -> None:
+    _write_config(
+        tmp_path,
+        """
+[project]
+name = "Billing Lib"
+profile = "lib"
+""".strip(),
+    )
+
+    config = load_config(tmp_path)
+
+    assert config.project.profile == "lib"
+    assert config.project.template == "baseline-lib"
+    assert config.run.app == "billing_lib.main:app"
+
+
+def test_load_config_rejects_incompatible_template_for_profile(tmp_path: Path) -> None:
+    _write_config(
+        tmp_path,
+        """
+[project]
+profile = "lib"
+template = "fastapi"
+""".strip(),
+    )
+
+    with pytest.raises(ConfigError, match="not valid for profile"):
         load_config(tmp_path)
 
 

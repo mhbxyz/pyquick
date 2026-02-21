@@ -28,7 +28,7 @@ Two profile groups are defined:
 | Profile | Contract status | Implementation status | Notes |
 | --- | --- | --- | --- |
 | `api` | stable | supported | current alpha baseline |
-| `lib` | stable keyword | reserved | planned follow-up (#24) |
+| `lib` | stable | supported | baseline library scaffold |
 | `cli` | stable keyword | reserved | planned follow-up (#26) |
 | `web` | stable keyword | reserved | taxonomy placeholder |
 | `game` | stable keyword | reserved | taxonomy placeholder |
@@ -44,7 +44,7 @@ Compatibility is defined by profile/template pair, not by template alone.
 | Profile | Default template | Compatible templates now | Planned compatible templates |
 | --- | --- | --- | --- |
 | `api` | `fastapi` | `fastapi` | additional API templates may be added later |
-| `lib` | `baseline-lib` | none (reserved) | `baseline-lib` |
+| `lib` | `baseline-lib` | `baseline-lib` | additional library templates may be added later |
 | `cli` | `baseline-cli` | none (reserved) | `baseline-cli` |
 | `web` | n/a | none (reserved) | tbd |
 | `game` | n/a | none (reserved) | tbd |

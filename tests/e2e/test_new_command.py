@@ -28,6 +28,25 @@ def test_new_generates_fastapi_project_structure() -> None:
         assert 'app = "my_api.main:app"' in pyquick_toml
 
 
+def test_new_generates_lib_project_structure() -> None:
+    runner = CliRunner()
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(app, ["new", "my-lib", "--profile", "lib"])
+
+        assert result.exit_code == 0
+        assert (
+            "Created project `my-lib` with profile `lib` and template `baseline-lib`."
+            in result.output
+        )
+
+        project_dir = Path("my-lib")
+        assert (project_dir / "pyproject.toml").exists()
+        assert (project_dir / "pyquick.toml").exists()
+        assert (project_dir / "src" / "my_lib" / "__init__.py").exists()
+        assert (project_dir / "tests" / "test_my_lib.py").exists()
+
+
 def test_new_rejects_non_empty_destination() -> None:
     runner = CliRunner()
 
@@ -63,10 +82,11 @@ def test_new_rejects_incompatible_profile_template_pair() -> None:
 
     with runner.isolated_filesystem():
         result = runner.invoke(
-            app, ["new", "mycli", "--profile", "api", "--template", "baseline-cli"]
+            app, ["new", "mycli", "--profile", "api", "--template", "baseline-lib"]
         )
 
         assert result.exit_code == 2
         assert (
-            "ERROR [usage] Unsupported template `baseline-cli` for profile `api`." in result.output
+            "ERROR [usage] Template `baseline-lib` is not compatible with profile `api`."
+            in result.output
         )
