@@ -4,21 +4,22 @@ from pathlib import Path
 
 import typer
 
-from pyqck.scaffold import FastAPITemplateContext, build_fastapi_template
+from pyqck.scaffold import ScaffoldLookupError, build_default_scaffold_registry
 from pyqck.scaffold.writer import write_scaffold
 
 
 def new_command(
     name: str = typer.Argument(..., help="Project directory name."),
     profile: str = typer.Option("api", "--profile", help="Project profile."),
-    template: str = typer.Option("fastapi", "--template", help="Template to use."),
+    template: str | None = typer.Option(None, "--template", help="Template to use."),
 ) -> None:
     """Create a new PyQuick project scaffold."""
 
-    if profile != "api":
-        _usage_error("Unsupported profile.", "Use `--profile api` for v1.")
-    if template != "fastapi":
-        _usage_error("Unsupported template.", "Use `--template fastapi` for v1.")
+    registry = build_default_scaffold_registry()
+    try:
+        selection = registry.build(project_name=name, profile=profile, template=template)
+    except ScaffoldLookupError as exc:
+        _usage_error(exc.message, exc.hint)
 
     destination = Path.cwd() / name
     if destination.exists() and not destination.is_dir():
@@ -32,8 +33,7 @@ def new_command(
             "Choose a new directory name or empty the destination first.",
         )
 
-    context = FastAPITemplateContext.from_project_name(name)
-    files = build_fastapi_template(context)
+    files = selection.files
 
     try:
         destination.mkdir(parents=True, exist_ok=True)
@@ -52,7 +52,10 @@ def new_command(
         raise typer.Exit(code=1) from exc
 
     typer.secho(
-        f"Created project `{name}` with profile `{profile}` and template `{template}`.",
+        (
+            f"Created project `{name}` with profile `{selection.profile}` "
+            f"and template `{selection.template}`."
+        ),
         fg=typer.colors.GREEN,
     )
     typer.echo("Next steps:")

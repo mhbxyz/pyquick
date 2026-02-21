@@ -48,8 +48,25 @@ def test_new_rejects_invalid_profile_or_template() -> None:
     with runner.isolated_filesystem():
         invalid_profile = runner.invoke(app, ["new", "myapi", "--profile", "worker"])
         assert invalid_profile.exit_code == 2
-        assert "ERROR [usage] Unsupported profile." in invalid_profile.output
+        assert "ERROR [usage] Unsupported profile `worker`." in invalid_profile.output
 
         invalid_template = runner.invoke(app, ["new", "myapi", "--template", "flask"])
         assert invalid_template.exit_code == 2
-        assert "ERROR [usage] Unsupported template." in invalid_template.output
+        assert (
+            "ERROR [usage] Unsupported template `flask` for profile `api`."
+            in invalid_template.output
+        )
+
+
+def test_new_rejects_incompatible_profile_template_pair() -> None:
+    runner = CliRunner()
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            app, ["new", "mycli", "--profile", "api", "--template", "baseline-cli"]
+        )
+
+        assert result.exit_code == 2
+        assert (
+            "ERROR [usage] Unsupported template `baseline-cli` for profile `api`." in result.output
+        )
