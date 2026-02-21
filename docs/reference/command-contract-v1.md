@@ -4,6 +4,8 @@
 
 Status: Accepted for milestone M1.
 
+Note: profile/template evolution for M7 is specified in [Profile/template contract v2](profile-template-contract-v2.md). v1 command guarantees in this document remain normative for current shipped behavior.
+
 This document defines the guaranteed behavior for v1 alpha commands and the shared execution conventions.
 
 ## Global Invariants
